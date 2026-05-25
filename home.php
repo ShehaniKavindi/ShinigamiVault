@@ -1,10 +1,15 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shinigami Vault</title>
+    <title>Shinigami Vault 
+        <?php if(isset($_SESSION['customer_id'])) { ?>
+             | <?php echo $_SESSION['customer_name']; ?>
+        <?php }?>
+    </title>
 
     <!-- stylesheets -->
     <link rel="stylesheet" href="css/bootstrap.css" />
