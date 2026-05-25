@@ -16,7 +16,11 @@
 <body>
 
     <!-- Header -->
-    <?php include "header.php"; ?>
+    <?php 
+    include "header.php"; 
+    include "connection.php" 
+    ?>
+
 
     <!-- carousel -->
     <div id="carouselExampleInterval" class="carousel slide" data-bs-ride="carousel">
@@ -125,48 +129,36 @@
         <!-- product container -->
         <div class="products-container">
             <div class="row row-cols-3 d-flex justify-content-center" style="margin-left: 1rem; margin-right: 1rem;">
-                <div class="product-card col">
-                    <div class="product-image">
-                        <img src="assets/products/sample.png" alt="">
-                    </div>
-                    <div class="product-details">
-                        <h6><a href="#">Jujutsu Kaisen | gojo satoru Oversized Tee</a></h6>
-                        <h5>LKR. 2200.00</h5>
-                    </div>
-                    <div class="d-flex justify-content-center">
-                        <div class="col-10 mt-2">
-                            <button class="primary-btn">Add to Bag</button>
+                <?php 
+                    $newly_arrivals_rs = Database::search("
+                        SELECT p.id, p.title, MIN(pi.path) as path, MIN(i.unit_price) as unit_price, col.name as collection_name
+                        FROM product p
+                        JOIN product_images pi ON pi.product_id = p.id
+                        JOIN inventory i ON i.product_id = p.id
+                        JOIN collection col ON col.id = p.collection_id
+                        GROUP BY p.id, p.title, col.name
+                        ORDER BY p.id DESC
+                        LIMIT 3
+                    ");
+
+                    while($newly_arrivals_data = $newly_arrivals_rs->fetch_assoc()) { ?>
+                        <div class="product-card col">
+                            <div class="product-image">
+                                <img src="<?php echo $newly_arrivals_data ['path']; ?>" alt="">
+                            </div>
+                            <div class="product-details">
+                                <h6><a href="singleProductView.php?id=<?php echo $newly_arrivals_data ['id']; ?>">
+                                    <?php echo $newly_arrivals_data ['collection_name'] . '&nbsp; | &nbsp;' . $newly_arrivals_data ['title']; ?>
+                                </a></h6>
+                                <h5>LKR. <?php echo number_format($newly_arrivals_data ['unit_price'], 2); ?></h5>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <div class="col-10 mt-2">
+                                    <button class="primary-btn">Add to Bag</button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="product-card col">
-                    <div class="product-image">
-                        <img src="assets/products/sample.png" alt="">
-                    </div>
-                    <div class="product-details">
-                        <h6><a href="#">Jujutsu Kaisen | gojo satoru Oversized Tee</a></h6>
-                        <h5>LKR. 2200.00</h5>
-                    </div>
-                    <div class="d-flex justify-content-center">
-                        <div class="col-10 mt-2">
-                            <button class="primary-btn">Add to Bag</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card col">
-                    <div class="product-image">
-                        <img src="assets/products/sample.png" alt="">
-                    </div>
-                    <div class="product-details">
-                        <h6><a href="#">Jujutsu Kaisen | gojo satoru Oversized Tee</a></h6>
-                        <h5>LKR. 2200.00</h5>
-                    </div>
-                    <div class="d-flex justify-content-center">
-                        <div class="col-10 mt-2">
-                            <button class="primary-btn">Add to Bag</button>
-                        </div>
-                    </div>
-                </div>
+                    <?php } ?>
 
             </div>
         </div>
