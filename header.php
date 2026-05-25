@@ -23,13 +23,14 @@
 
 <!-- Cart Sidebar -->
 <div class="cart-sidebar" id="cartSidebar">
-
+    
     <!-- Header -->
     <div class="cart-header">
         <h2 class="cart-title">The Vault</h2>
         <button class="cart-close" onclick="closeCart()">✕</button>
     </div>
 
+    
     <!-- Items -->
     <div class="cart-items">
         <div class="cart-item">

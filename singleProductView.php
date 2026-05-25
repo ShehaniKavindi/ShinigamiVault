@@ -588,7 +588,7 @@ $product = $product_rs->fetch_assoc();
 
     .color-btn:hover, .color-btn.active {
         border-color: var(--dark-grey);
-    }
+    } 
 
     .size-btn:disabled {
         opacity: 0.35;
