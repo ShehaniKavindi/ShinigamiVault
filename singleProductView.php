@@ -43,7 +43,16 @@ $product = $product_rs->fetch_assoc();
 
     <!-- Single Product View -->
     <div class="single-product-section">
+
+        <!-- toast -->
+        <div class="toast-msg" id="toast-msg">
+            <i id="toast-icon" class="bi bi-x-circle-fill"></i>
+            <span id="toast-text" class="toast-text"></span>
+        </div>
+
+        
         <div class="single-product-container">
+            
 
             <!-- LEFT SIDE -->
             <div class="product-gallery">
@@ -92,7 +101,7 @@ $product = $product_rs->fetch_assoc();
 
                 <?php
                     $variants_rs = Database::search("
-                        SELECT i.size_id, i.color_id, i.qty, s.value as size_value, c.name as color_name, c.code as color_code
+                        SELECT i.id as inventory_id, i.size_id, i.color_id, i.qty, s.value as size_value, c.name as color_name, c.code as color_code
                         FROM inventory i
                         JOIN size s ON s.id = i.size_id
                         JOIN color c ON c.id = i.color_id
@@ -114,11 +123,13 @@ $product = $product_rs->fetch_assoc();
                     <span class="label">color :</span>
                     <div class="color-options">
                         <?php foreach($colors as $color) { ?>
-                            <button class="color-btn" 
-                                style="background-color: <?php echo $color['code']; ?>;"
-                                title="<?php echo $color['name']; ?>">
-                                <?php echo $color['name']; ?>
-                            </button>
+                            <div class="color-option-wrap">
+                                <button class="color-btn" 
+                                    style="background-color: <?php echo $color['code']; ?>;"
+                                    title="<?php echo $color['name']; ?>">
+                                </button>
+                                <span class="color-name"><?php echo $color['name']; ?></span>
+                            </div>
                         <?php } ?>
                     </div>
                 </div>
@@ -159,7 +170,9 @@ $product = $product_rs->fetch_assoc();
                 </div>
 
                 <div class="action-row">
-                    <button class="add-to-bag-btn" type="button">Add to bag</button>
+                    <button class="add-to-bag-btn" type="button" onclick="AddToBag();">
+                        Add to bag
+                    </button>
                     <button class="wishlist-btn" type="button">
                         <i class="bi bi-suit-heart"></i>
                     </button>
@@ -288,6 +301,12 @@ $product = $product_rs->fetch_assoc();
     <!-- footer -->
     <?php include "footer.php"; ?>
 
+    <!-- js -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/bootstrap.bundle.js"></script>
     <script>
         const variants = <?php echo json_encode($variants); ?>;
 
@@ -336,14 +355,61 @@ $product = $product_rs->fetch_assoc();
                 updateStock();
             });
         });
+
+
+        function AddToBag() {
+            const activeSize = document.querySelector(".size-btn.active");
+            const activeColor = document.querySelector(".color-btn.active");
+
+            if(!activeSize || !activeColor) {
+                showToast("⚠ Please select a size and color!");
+                return;
+            }
+
+            const selectedSize = activeSize.textContent.trim();
+            const selectedColor = activeColor.textContent.trim();
+
+            const match = variants.find(v => 
+                v.size_value.trim() === selectedSize && 
+                v.color_name.trim() === selectedColor
+            );
+
+            if(!match) {
+                showToast("⚠ Selected variant not found!");
+                return;
+            }
+
+            if(match.qty == 0) {
+                showToast("⚠ This item is out of stock!");
+                return;
+            }
+
+            const qty = document.getElementById("qtyValue").textContent;
+
+            var form = new FormData();
+            form.append("inventory_id", match.inventory_id);
+            form.append("qty", qty);
+
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function() {
+                if(request.readyState == 4 && request.status == 200) {
+                    var response = request.responseText;
+                    if(response == "success") {
+                        showToast("Added to bag! ✓", "success");
+                    } else if(response == "login") {
+                        showToast("⚠ Please login first!");
+                        setTimeout(() => window.location.href = "index.php", 1500);
+                    } else {
+                        showToast("⚠ Something went wrong!");
+                    }
+                }
+            }
+            request.open("POST", "processes/addToCartProcess.php", true);
+            request.send(form);
+        }
     </script>
 
-    <!-- js -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/bootstrap.js"></script>
-    <script src="js/bootstrap.bundle.js"></script>
+    
 </body>
 
 </html>
@@ -496,14 +562,27 @@ $product = $product_rs->fetch_assoc();
         gap: 10px;
     }
 
+    .color-option-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+
     .color-btn {
+        width: 30px;
         height: 30px;
-        padding: 0 12px;
-        border-radius: 18px;
+        border-radius: 50%;
         border: 2px solid transparent;
         cursor: pointer;
         transition: 0.3s ease;
-        font-size: 0.75rem;
+        padding: 0;
+    }
+
+    .color-name {
+        font-size: 0.65rem;
+        color: var(--dark-grey);
+        text-align: center;
         letter-spacing: 0.05em;
     }
 

@@ -376,38 +376,6 @@
         text-decoration: underline;
     }
 
-    .toast-msg {
-        position: fixed;
-        top: 12vh;
-        right: 1.5rem;
-        background-color: var(--red);
-        padding: 0.75rem 1.2rem;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        font-size: 0.78rem;
-        letter-spacing: 0.05em;
-        z-index: 999;
-        opacity: 0;
-        transform: translateY(-8px);
-        transition: opacity 0.3s ease, transform 0.3s ease;
-        pointer-events: none;
-    }
-
-    .toast-text {
-        color: var(--white);
-    }
-
-    .toast-msg.show {
-        opacity: 1;
-        transform: translateY(0);
-        pointer-events: auto;
-    }
-
-    .toast-msg i {
-        color: var(--white);
-        font-size: 1rem;
-    }
+    
 </style>
 
