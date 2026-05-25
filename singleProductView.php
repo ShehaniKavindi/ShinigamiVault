@@ -1,10 +1,31 @@
+<?php
+include "connection.php";
+
+$product_id = isset($_GET['id']) ? $_GET['id'] : 0;
+
+$product_rs = Database::search("
+    SELECT p.id, p.title, p.description, p.collection_id, MIN(pi.path) as path, MIN(i.unit_price) as unit_price, 
+           col.name as collection_name, t.name as type_name, cat.name as category_name
+    FROM product p
+    JOIN product_images pi ON pi.product_id = p.id
+    JOIN inventory i ON i.product_id = p.id
+    JOIN collection col ON col.id = p.collection_id
+    JOIN type t ON t.id = p.type_id
+    JOIN category cat ON cat.id = t.category_id
+    WHERE p.id = $product_id
+    GROUP BY p.id, p.title, p.description, p.collection_id, col.name, t.name, cat.name
+");
+
+$product = $product_rs->fetch_assoc();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shinigami Vault | Gojo Satoru Oversized Tee</title>
+    <title>Shinigami Vault | <?php echo $product['title']; ?></title>
 
     <!-- stylesheets -->
     <link rel="stylesheet" href="css/bootstrap.css" />
@@ -26,59 +47,102 @@
 
             <!-- LEFT SIDE -->
             <div class="product-gallery">
+                <?php $images_rs = Database::search("
+                    SELECT pi.path, pi.color_id, c.name as color_name, c.code as color_code
+                    FROM product_images pi
+                    JOIN color c ON c.id = pi.color_id
+                    WHERE pi.product_id = $product_id
+                ");
+
+                $images = $images_rs->fetch_all(MYSQLI_ASSOC);
+                ?>
+
+                <!-- main image -->
                 <div class="main-image-box">
-                    <img id="mainProductImage" src="assets/products/sample.png" alt="Gojo Satoru Oversized Tee"
-                        class="main-product-image">
+                    <img id="mainProductImage" src="<?php echo $images[0]['path']; ?>" alt="" class="main-product-image">
                 </div>
 
+                <!-- thumbnails -->
                 <div class="thumbnail-row">
-                    <div class="thumb active" onclick="changeImage('assets/products/sample.png', this)">
-                        <img src="assets/products/sample.png" alt="thumb 1">
-                    </div>
-
-                    <div class="thumb" onclick="changeImage('assets/products/3.jpg', this)">
-                        <img src="assets/products/3.jpg" alt="thumb 2">
-                    </div>
-
-                    <div class="thumb" onclick="changeImage('assets/products/4.jpg', this)">
-                        <img src="assets/products/4.jpg" alt="thumb 3">
-                    </div>
+                    <?php for($i = 0; $i < count($images); $i++) { ?>
+                        <div class="thumb <?php echo $i == 0 ? 'active' : ''; ?>" 
+                            onclick="changeImage('<?php echo $images[$i]['path']; ?>', this)">
+                            <img src="<?php echo $images[$i]['path']; ?>" alt="">
+                        </div>
+                    <?php } ?>
                 </div>
             </div>
 
             <!-- RIGHT SIDE -->
             <div class="product-info">
-                <p class="breadcrumb">TEE / Oversized /</p>
+                <p class="breadcrumb">
+                    <?php echo $product['category_name']; ?> / <?php echo $product['type_name']; ?>
+                </p>
 
-                <h2 class="product-title">Gojo Satoru Oversized Tee</h2>
+                <h2 class="product-title">
+                    <?php echo $product['collection_name'] . ' | ' . $product['title']; ?>
+                </h2>
 
                 <div class="rating-row">
                     <div class="stars">★★★★★</div>
                     <span>5 star reviews</span>
                 </div>
 
-                <h3 class="price">LKR. 2200.00</h3>
+                <h3 class="price">LKR. <?php echo number_format($product['unit_price'], 2); ?></h3>
+
+                <?php
+                    $variants_rs = Database::search("
+                        SELECT i.size_id, i.color_id, i.qty, s.value as size_value, c.name as color_name, c.code as color_code
+                        FROM inventory i
+                        JOIN size s ON s.id = i.size_id
+                        JOIN color c ON c.id = i.color_id
+                        WHERE i.product_id = $product_id
+                    ");
+
+                    $variants = $variants_rs->fetch_all(MYSQLI_ASSOC);
+
+                    // separate sizes and colors
+                    $sizes = [];
+                    $colors = [];
+                    foreach($variants as $v) {
+                        $sizes[$v['size_id']] = ['value' => $v['size_value'], 'qty' => $v['qty']];
+                        $colors[$v['color_id']] = ['name' => $v['color_name'], 'code' => $v['color_code']];
+                    }
+                ?>
 
                 <div class="info-line">
                     <span class="label">color :</span>
-                    <span class="value strong">black</span>
+                    <div class="color-options">
+                        <?php foreach($colors as $color) { ?>
+                            <button class="color-btn" 
+                                style="background-color: <?php echo $color['code']; ?>;"
+                                title="<?php echo $color['name']; ?>">
+                                <?php echo $color['name']; ?>
+                            </button>
+                        <?php } ?>
+                    </div>
                 </div>
 
                 <div class="size-row">
                     <span class="label">size :</span>
                     <div class="size-options">
-                        <button class="size-btn">xs</button>
-                        <button class="size-btn active">s</button>
-                        <button class="size-btn">m</button>
-                        <button class="size-btn">l</button>
-                        <button class="size-btn">xl</button>
-                        <button class="size-btn">xxl</button>
+                        <?php foreach($sizes as $size) { ?>
+                            <button class="size-btn <?php echo $size['qty'] == 0 ? 'disabled' : ''; ?>"
+                                <?php echo $size['qty'] == 0 ? 'disabled' : ''; ?>>
+                                <?php echo $size['value']; ?>
+                            </button>
+                        <?php } ?>
                     </div>
                 </div>
 
+                <?php
+                    $single_variant = count($sizes) == 1 && count($colors) == 1;
+                    $default_stock = $single_variant ? $variants[0]['qty'] : 'select size & color';
+                ?>
+
                 <div class="info-line stock-line">
                     <span class="label">In stock :</span>
-                    <span class="value strong">14</span>
+                    <span class="value strong" id="stockValue"><?php echo $default_stock; ?></span>
                 </div>
 
                 <div class="quantity-sizechart-row">
@@ -108,17 +172,7 @@
         <!-- product description -->
         <div class="product-description-section">
             <h3>Products Description</h3>
-            <ul>
-                <li>🖤 Premium 240 GSM Heavyweight Cotton — Crafted from thick, ultra-soft 100% combed cotton for a
-                    structured drop-shoulder fit that holds its shape wash after wash, keeping you comfortable all day
-                    long.</li>
-                <li>🎨 Exclusive Anime Artwork — Features a bold, high-detail graphic of Gojo Satoru set against a
-                    striking red sun backdrop, printed using fade-resistant DTF (Direct-to-Film) printing for vivid
-                    colors that last.</li>
-                <li>📐 Relaxed Oversized Silhouette — Designed with a boxy, streetwear-inspired cut with dropped
-                    shoulders and extended length, perfect for layering or wearing solo — available in sizes XS to XXL.
-                </li>
-            </ul>
+            <p><?php echo nl2br(str_replace('.', '.<br>', $product['description'])); ?></p>
         </div>
 
         <!-- REVIEWS -->
@@ -183,52 +237,49 @@
         <!-- YOU MAY ALSO LIKE -->
         <div class="related-section">
             <h3>You may also like</h3>
+            <?php
+            $related_rs = Database::search("
+                SELECT p.id, p.title, MIN(pi.path) as path, MIN(i.unit_price) as unit_price, col.name as collection_name
+                FROM product p
+                JOIN product_images pi ON pi.product_id = p.id
+                JOIN inventory i ON i.product_id = p.id
+                JOIN collection col ON col.id = p.collection_id
+                WHERE p.collection_id = {$product['collection_id']} AND p.id != $product_id
+                GROUP BY p.id, p.title, col.name
+                ORDER BY p.id DESC
+                LIMIT 3
+            ");
+            $related_num = $related_rs->num_rows;
+            ?>
             <!-- product container -->
             <div class="products-container">
                 <div class="row row-cols-3 d-flex justify-content-center"
                     style="margin-left: 1rem; margin-right: 1rem; margin-top: -2rem;">
-                    <div class="product-card col">
-                        <div class="product-image">
-                            <img src="assets/products/sample.png" alt="">
-                        </div>
-                        <div class="product-details">
-                            <h6><a href="#">Jujutsu Kaisen | gojo satoru Oversized Tee</a></h6>
-                            <h5>LKR. 2200.00</h5>
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            <div class="col-10 mt-2">
-                                <button class="primary-btn">Add to Bag</button>
+                    <?php 
+                        for ($r=0; $r < $related_num; $r++) { 
+                            $related_data = $related_rs->fetch_assoc();
+                            ?>
+                            
+                            <div class="product-card col">
+                                <div class="product-image">
+                                    <img src="<?php echo $related_data['path']; ?>" alt="">
+                                </div>
+                                <div class="product-details">
+                                    <h6><a href="singleProductView.php?id=<?php echo $related_data['id']; ?>">
+                                        <?php echo $related_data['collection_name'] . ' | ' . $related_data['title']; ?>
+                                    </a></h6>
+                                    <h5>LKR. <?php echo number_format($related_data['unit_price'], 2); ?></h5>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <div class="col-10 mt-2">
+                                        <button class="primary-btn">Add to Bag</button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="product-card col">
-                        <div class="product-image">
-                            <img src="assets/products/sample.png" alt="">
-                        </div>
-                        <div class="product-details">
-                            <h6><a href="#">Jujutsu Kaisen | gojo satoru Oversized Tee</a></h6>
-                            <h5>LKR. 2200.00</h5>
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            <div class="col-10 mt-2">
-                                <button class="primary-btn">Add to Bag</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-card col">
-                        <div class="product-image">
-                            <img src="assets/products/sample.png" alt="">
-                        </div>
-                        <div class="product-details">
-                            <h6><a href="#">Jujutsu Kaisen | gojo satoru Oversized Tee</a></h6>
-                            <h5>LKR. 2200.00</h5>
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            <div class="col-10 mt-2">
-                                <button class="primary-btn">Add to Bag</button>
-                            </div>
-                        </div>
-                    </div>
+                            <?php
+                        }
+                    ?>
+                    
                 </div>
             </div>
         </div>
@@ -236,6 +287,56 @@
 
     <!-- footer -->
     <?php include "footer.php"; ?>
+
+    <script>
+        const variants = <?php echo json_encode($variants); ?>;
+
+        function updateStock() {
+            const activeSize = document.querySelector(".size-btn.active");
+            const activeColor = document.querySelector(".color-btn.active");
+
+            if(!activeSize || !activeColor) {
+                document.getElementById("stockValue").textContent = "select size & color";
+                return;
+            }
+
+            const selectedSize = activeSize.textContent.trim();
+            const selectedColor = activeColor.textContent.trim();
+
+            const match = variants.find(v => 
+                v.size_value.trim() === selectedSize && 
+                v.color_name.trim() === selectedColor
+            );
+
+            document.getElementById("stockValue").textContent = match ? match.qty : "0";
+        }
+
+        window.addEventListener("load", function() {
+            const firstSize = document.querySelector(".size-btn:not(:disabled)");
+            const firstColor = document.querySelector(".color-btn");
+
+            if(firstSize) firstSize.classList.add("active");
+            if(firstColor) firstColor.classList.add("active");
+
+            updateStock();
+        });
+
+        document.querySelectorAll(".size-btn").forEach(btn => {
+            btn.addEventListener("click", function() {
+                document.querySelectorAll(".size-btn").forEach(b => b.classList.remove("active"));
+                this.classList.add("active");
+                updateStock();
+            });
+        });
+
+        document.querySelectorAll(".color-btn").forEach(btn => {
+            btn.addEventListener("click", function() {
+                document.querySelectorAll(".color-btn").forEach(b => b.classList.remove("active"));
+                this.classList.add("active");
+                updateStock();
+            });
+        });
+    </script>
 
     <!-- js -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -388,6 +489,32 @@
     .strong {
         font-weight: 700;
         color: var(--dark-grey);
+    }
+
+    .color-options {
+        display: flex;
+        gap: 10px;
+    }
+
+    .color-btn {
+        height: 30px;
+        padding: 0 12px;
+        border-radius: 18px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: 0.3s ease;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+
+    .color-btn:hover, .color-btn.active {
+        border-color: var(--dark-grey);
+    }
+
+    .size-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        text-decoration: line-through;
     }
 
     .size-options {
@@ -543,18 +670,15 @@
     .related-section h3 {
         font-family: 'header';
         font-size: 1.4rem;
-        margin-bottom: 18px;
+        margin-bottom: 25px;
         color: var(--dark-grey);
     }
 
-    .product-description-section ul {
+    .product-description-section p {
         padding-left: 28px;
-    }
-
-    .product-description-section li {
         font-size: 0.9rem;
         margin-bottom: 10px;
-        line-height: 1.5;
+        line-height: 1.2;
         color: #636363;
     }
 
