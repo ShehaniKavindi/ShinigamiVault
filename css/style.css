@@ -298,6 +298,10 @@
     color: var(--black);
 }
 
+.header-btns {
+    position: relative;
+}
+
 .header-btns i {
     padding: 0 8px;
     font-size: 1.15rem;

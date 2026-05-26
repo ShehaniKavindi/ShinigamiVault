@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -18,8 +19,9 @@
 
     <!-- header -->
     <?php 
-    include "header.php"; 
     include "connection.php"; 
+    include "header.php"; 
+    
     
     $filter = isset($_GET['filter']) ? $_GET['filter'] : 'newest';
     $search = isset($_GET['search']) ? $_GET['search'] : '';
