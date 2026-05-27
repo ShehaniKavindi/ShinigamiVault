@@ -24,12 +24,16 @@ function showNewPw() {
     document.querySelector('.auth-newpw-container').classList.remove('d-none');
 }
 
+
 // goto
 function gotoSearch() {
     window.location = "search.php";
 }
 function gotoHome() {
     window.location = "home.php";
+}
+function gotoProfile(){
+    window.location = "customerProfile.php";
 }
 
 // ============== Toast Box ===========

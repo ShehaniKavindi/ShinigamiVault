@@ -35,7 +35,18 @@
             <span class="cart-count"><?php echo $cart_num; ?></span>
         <?php }
         } ?>
-        <i class="bi bi-person"></i>
+        
+        <?php
+        if (isset($_SESSION['customer_id'])) {
+            ?>
+            <i class="bi bi-person" onclick=" gotoProfile();"></i>
+            <?php
+        }else {
+            ?>
+            <i class="bi bi-person" onclick=" showLogin();"></i>
+            <?php
+        }?>
+        
     </div>
 </header>
 
