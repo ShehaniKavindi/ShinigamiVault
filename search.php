@@ -105,7 +105,7 @@
                 </div>
                 <div class="d-flex justify-content-center">
                     <div class="col-10 mt-2">
-                        <button class="primary-btn">Add to Bag</button>
+                        <button class="primary-btn"><a style="text-decoration: none; color: white;" href="singleProductView.php?id=<?php echo $all_products_data['id']; ?>">select options</a></button>
                     </div>
                 </div>
             </div>

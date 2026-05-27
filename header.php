@@ -1,23 +1,3 @@
-<?php 
-    if (isset($_SESSION['customer_id'])) {
-        $cart_rs = Database::search("
-            SELECT c.id, c.qty, p.title, MIN(pi.path) as path, i.unit_price,
-                col.name as collection_name, s.value as size_value, col2.name as color_name
-            FROM cart c
-            JOIN inventory i ON i.id = c.inventory_id
-            JOIN product p ON p.id = i.product_id
-            JOIN product_images pi ON pi.product_id = p.id
-            JOIN collection col ON col.id = p.collection_id
-            JOIN size s ON s.id = i.size_id
-            JOIN color col2 ON col2.id = i.color_id
-            WHERE c.customer_id = '{$_SESSION['customer_id']}'
-            GROUP BY c.id, c.qty, p.title, i.unit_price, col.name, s.value, col2.name
-        ");
-
-    $cart_num = $cart_rs->num_rows;
-    $cart_total = 0;
-?>
-
 <!-- header -->
 <header class="header">
     <div class="brand-name">
@@ -34,9 +14,27 @@
         <i class="bi bi-search" onclick="gotoSearch();"></i>
         <i class="bi bi-brightness-high"></i>
         <i class="bi bi-bag" onclick="openCart()"></i>
-        <?php if($cart_num > 0) { ?>
+        <?php
+        if (isset($_SESSION['customer_id'])) {
+        $cart_rs = Database::search("
+            SELECT c.id, c.qty, p.title, MIN(pi.path) as path, i.unit_price,
+                col.name as collection_name, s.value as size_value, col2.name as color_name
+            FROM cart c
+            JOIN inventory i ON i.id = c.inventory_id
+            JOIN product p ON p.id = i.product_id
+            JOIN product_images pi ON pi.product_id = p.id
+            JOIN collection col ON col.id = p.collection_id
+            JOIN size s ON s.id = i.size_id
+            JOIN color col2 ON col2.id = i.color_id
+            WHERE c.customer_id = '{$_SESSION['customer_id']}'
+            GROUP BY c.id, c.qty, p.title, i.unit_price, col.name, s.value, col2.name
+        ");
+        $cart_num = $cart_rs->num_rows;
+
+        if($cart_num > 0) { ?>
             <span class="cart-count"><?php echo $cart_num; ?></span>
-        <?php } ?>
+        <?php }
+        } ?>
         <i class="bi bi-person"></i>
     </div>
 </header>
@@ -53,7 +51,12 @@
         <button class="cart-close" onclick="closeCart()">✕</button>
     </div>
 
-    <?php
+    <?php 
+    if (isset($_SESSION['customer_id'])) {
+        
+    $cart_num = $cart_rs->num_rows;
+    $cart_total = 0;
+
         if ($cart_num == 0) {
         ?> 
             <!-- Items -->
@@ -90,7 +93,7 @@
                         <p class="cart-item-price">LKR. <?php echo $cart_data['unit_price']; ?>.00</p>
                         <p class="cart-item-variant">x <?php echo $cart_data['qty']; ?> | <?php echo $cart_data['color_name']; ?></p>
                     </div>
-                    <button class="cart-item-remove" title="Remove" onclick="removeFromCart();">✕</button>
+                    <button class="cart-item-remove" title="Remove" onclick="removeFromCart(<?php echo $cart_data['id']; ?>);">✕</button>
                 </div>
                 <?php
                 }
@@ -325,5 +328,22 @@
         document.getElementById('cartSidebar').classList.remove('open');
         document.getElementById('cartOverlay').classList.remove('active');
         document.body.style.overflow = '';
+    }
+
+    function removeFromCart(cartId) {
+        var request = new XMLHttpRequest();
+        request.onreadystatechange = function() {
+            if (request.readyState == 4 && request.status == 200) {
+                var response = request.responseText;
+                if (response == "success") {
+                    location.reload();
+                } else {
+                    alert(response);
+                }
+            }
+        }
+        request.open("POST", "processes/removeFromCartProcess.php", true);
+        request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        request.send("cart_id=" + cartId);
     }
 </script>

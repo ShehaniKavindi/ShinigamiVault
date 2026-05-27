@@ -86,7 +86,7 @@ $product = $product_rs->fetch_assoc();
             <!-- RIGHT SIDE -->
             <div class="product-info">
                 <p class="breadcrumb">
-                    <?php echo $product['category_name']; ?> / <?php echo $product['type_name']; ?>
+                    <?php echo $product['category_name']; ?> / <?php echo $product['type_name']; ?> /
                 </p>
 
                 <h2 class="product-title">
