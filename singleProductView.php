@@ -127,6 +127,7 @@ $product = $product_rs->fetch_assoc();
                             <div class="color-option-wrap">
                                 <button class="color-btn" 
                                     style="background-color: <?php echo $color['code']; ?>;"
+                                    data-color="<?php echo $color['name']; ?>"
                                     title="<?php echo $color['name']; ?>">
                                 </button>
                                 <span class="color-name"><?php echo $color['name']; ?></span>
@@ -170,14 +171,9 @@ $product = $product_rs->fetch_assoc();
                     <a href="#" class="size-chart-link">Size chart</a>
                 </div>
 
-                <div class="action-row">
-                    <button class="add-to-bag-btn" type="button" onclick="AddToBag();">
-                        Add to bag
-                    </button>
-                    <button class="wishlist-btn" type="button">
-                        <i class="bi bi-suit-heart"></i>
-                    </button>
-                </div>
+                <button class="add-to-bag-btn" type="button" onclick="AddToBag();">
+                    Add to bag
+                </button>
 
                 <button class="buynow-btn" type="button">Buy now</button>
             </div>
@@ -309,6 +305,43 @@ $product = $product_rs->fetch_assoc();
     <script src="js/bootstrap.js"></script>
     <script src="js/bootstrap.bundle.js"></script>
     <script>
+
+        function changeImage(imageSrc, clickedThumb) {
+            document.getElementById("mainProductImage").src = imageSrc;
+
+            document.querySelectorAll(".thumb").forEach((thumb) => {
+                thumb.classList.remove("active");
+            });
+
+            clickedThumb.classList.add("active");
+        }
+
+        let qty = 1;
+
+        function increaseQty() {
+            const stock = parseInt(document.getElementById("stockValue").textContent);
+            if (qty < stock) {
+                qty++;
+                document.getElementById("qtyValue").textContent = qty;
+            } else {
+                showToast("⚠ Maximum stock reached!");
+            }
+        }
+
+        function decreaseQty() {
+            if (qty > 1) {
+                qty--;
+                document.getElementById("qtyValue").textContent = qty;
+            }
+        }
+
+        document.querySelectorAll(".size-btn").forEach((button) => {
+            button.addEventListener("click", function () {
+                document.querySelectorAll(".size-btn").forEach((btn) => btn.classList.remove("active"));
+                this.classList.add("active");
+            });
+        });
+
         const variants = <?php echo json_encode($variants); ?>;
 
         function updateStock() {
@@ -321,7 +354,7 @@ $product = $product_rs->fetch_assoc();
             }
 
             const selectedSize = activeSize.textContent.trim();
-            const selectedColor = activeColor.textContent.trim();
+            const selectedColor = activeColor.dataset.color.trim();
 
             const match = variants.find(v => 
                 v.size_value.trim() === selectedSize && 
@@ -368,7 +401,7 @@ $product = $product_rs->fetch_assoc();
             }
 
             const selectedSize = activeSize.textContent.trim();
-            const selectedColor = activeColor.textContent.trim();
+            const selectedColor = activeColor.dataset.color.trim();
 
             const match = variants.find(v => 
                 v.size_value.trim() === selectedSize && 
@@ -397,6 +430,7 @@ $product = $product_rs->fetch_assoc();
                     var response = request.responseText;
                     if(response == "success") {
                         showToast("Added to bag! ✓", "success");
+                        refreshCart();
                     } else if(response == "login") {
                         showToast("⚠ Please login first!");
                         setTimeout(() => window.location.href = "index.php", 1500);
@@ -407,6 +441,41 @@ $product = $product_rs->fetch_assoc();
             }
             request.open("POST", "processes/addToCartProcess.php", true);
             request.send(form);
+        }
+
+        function refreshCart() {
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if(req.readyState == 4 && req.status == 200) {
+                    document.getElementById('cartSidebar').innerHTML = req.responseText;
+                    updateCartCount();
+                    openCart();
+                }
+            }
+            req.open("GET", "getCartPartial.php", true);
+            req.send();
+        }
+
+        function updateCartCount() {
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if(req.readyState == 4 && req.status == 200) {
+                    var count = parseInt(req.responseText);
+                    var badge = document.querySelector('.cart-count');
+                    if(count > 0) {
+                        if(!badge) {
+                            badge = document.createElement('span');
+                            badge.className = 'cart-count';
+                            document.querySelector('.header-btns').appendChild(badge);
+                        }
+                        badge.textContent = count;
+                    } else {
+                        if(badge) badge.remove();
+                    }
+                }
+            }
+            req.open("GET", "processes/getCartCountProcess.php", true);
+            req.send();
         }
     </script>
 
@@ -672,14 +741,6 @@ $product = $product_rs->fetch_assoc();
         color: var(--black)
     }
 
-    .action-row {
-        display: grid;
-        grid-template-columns: 1fr 62px;
-        gap: 10px;
-        margin-top: 2.5rem;
-        margin-bottom: 10px;
-    }
-
     .add-to-bag-btn {
         width: 100%;
         height: 3.5rem;
@@ -690,6 +751,8 @@ $product = $product_rs->fetch_assoc();
         letter-spacing: 1px;
         font-size: 1rem;
         font-weight: 800;
+        margin-top: 2.5rem;
+        margin-bottom: 10px;
     }
 
     .add-to-bag-btn:hover {
@@ -871,36 +934,3 @@ $product = $product_rs->fetch_assoc();
       margin-top: 4px;
     }
 </style>
-
-<script>
-    function changeImage(imageSrc, clickedThumb) {
-        document.getElementById("mainProductImage").src = imageSrc;
-
-        document.querySelectorAll(".thumb").forEach((thumb) => {
-            thumb.classList.remove("active");
-        });
-
-        clickedThumb.classList.add("active");
-    }
-
-    let qty = 1;
-
-    function increaseQty() {
-        qty++;
-        document.getElementById("qtyValue").textContent = qty;
-    }
-
-    function decreaseQty() {
-        if (qty > 1) {
-            qty--;
-            document.getElementById("qtyValue").textContent = qty;
-        }
-    }
-
-    document.querySelectorAll(".size-btn").forEach((button) => {
-        button.addEventListener("click", function () {
-            document.querySelectorAll(".size-btn").forEach((btn) => btn.classList.remove("active"));
-            this.classList.add("active");
-        });
-    });
-</script>
