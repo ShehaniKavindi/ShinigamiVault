@@ -58,19 +58,23 @@ session_start();
 
     
     <main class="profile-rhs">
+        <!-- toast -->
+        <div class="toast-msg" id="toast-msg">
+            <i id="toast-icon" class="bi bi-x-circle-fill"></i>
+            <span id="toast-text" class="toast-text"></span>
+        </div>
 
         <div class="profile-details">
             <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 1.5rem;">
                 <h5 class="profile-headings">Profile Details</h5>
-                <button class="saveChanges-btn">save profile details</button>
+                <button class="saveChanges-btn" onclick="saveProfileDetails();">save profile details</button>
             </div>
-            
 
             <div class="form-row">
                 <!-- Full name -->
                 <div class="field-wrap">
-                    <input class="field-input" value="<?php echo $customer_data['fullname']; ?>" type="text" id="" placeholder=" " />
-                    <label class="field-label" for="" >Fullname</label>
+                    <input class="field-input" value="<?php echo $customer_data['fullname']; ?>" type="text" id="customer_fullname" placeholder=" " />
+                    <label class="field-label" for="customer_fullname" >Fullname</label>
                 </div>
                 <!-- Email -->
                 <div class="field-wrap">
@@ -86,16 +90,18 @@ session_start();
                         <i id="pf_password_icon" class="bi bi-eye-slash"></i>
                     </button>
                 </div>
-                
             </div>
 
         </div>
+
         <br>
+
         <div class="profile-details">
             <?php
             $address_rs = Database::search("
                 SELECT 
                     a.line1, a.line2, a.city, a.postal_code, a.contact1, a.contact2,
+                    a.district_id,
                     d.name as district_name,
                     p.name as province_name
                 FROM address a
@@ -108,46 +114,41 @@ session_start();
             ?>
             <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 1.5rem;">
                 <h5 class="profile-headings">Shipping Details</h5>
-                <button class="saveChanges-btn">save shipping details</button>
+                <button class="saveChanges-btn" onclick="saveAddressDetails();">save shipping details</button>
             </div>
 
             <div class="form-row">
                 <!-- line 2 -->
                 <div class="field-wrap">
-                    <input class="field-input" value="<?php echo $address_data['line1'] ?? ''; ?>" type="text" id="" placeholder=" " />
+                    <input class="field-input" value="<?php echo $address_data['line1'] ?? ''; ?>" type="text" id="line1" placeholder=" " />
                     <label class="field-label" for="" >Line 01</label>
                 </div>
                 <!-- line 2 -->
                 <div class="field-wrap">
-                    <input class="field-input" value="<?php echo $address_data['line2'] ?? ''; ?>" type="text" id="" placeholder=" " />
+                    <input class="field-input" value="<?php echo $address_data['line2'] ?? ''; ?>" type="text" id="line2" placeholder=" " />
                     <label class="field-label" for="" >Line 02</label>
                 </div>
 
                 <!-- city -->
                 <div class="field-wrap">
-                    <input class="field-input" value="<?php echo $address_data['city'] ?? ''; ?>" type="text" id="" placeholder=" " />
+                    <input class="field-input" value="<?php echo $address_data['city'] ?? ''; ?>" type="text" id="city" placeholder=" " />
                     <label class="field-label" for="" >City</label>
                 </div>
                 
 
                 <!-- disctrict -->
-                <?php 
-                $districts_rs = Database::search("SELECT id, name FROM district ORDER BY name");
-                    ?>
-                    <div class="field-wrap field-select-wrap">
-                        <select class="field-select" id="district">
-                            <option value="" disabled <?php echo $address_num == 0 ? 'selected' : ''; ?> hidden>Select district</option>
-                            <?php while($d = $districts_rs->fetch_assoc()) { ?>
-                                <option value="<?php echo $d['id']; ?>"
-                                    <?php echo ($address_data['district_name'] == $d['name']) ? 'selected' : ''; ?>>
-                                    <?php echo $d['name']; ?>
+                    <div class="field-wrap field-select-wrap" onclick="checkProvince(event);">
+                        <select class="field-select" id="district"  >
+                            <option value="" disabled <?php echo $address_num == 0 ? 'selected' : ''; ?> hidden></option>
+                            <?php if($address_num > 0) { ?>
+                                <option value="<?php echo $address_data['district_id']; ?>" selected>
+                                    <?php echo $address_data['district_name']; ?>
                                 </option>
                             <?php } ?>
                         </select>
                         <label class="field-label" for="district">District</label>
                         <span class="chevron">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.2">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                                 <polyline points="6 9 12 15 18 9" />
                             </svg>
                         </span>
@@ -158,11 +159,11 @@ session_start();
                 $province_rs = Database::search("SELECT id, name FROM province ORDER BY name");
                     ?>
                     <div class="field-wrap field-select-wrap">
-                        <select class="field-select" id="province">
-                            <option value="" disabled <?php echo $address_num == 0 ? 'selected' : ''; ?> hidden>Select province</option>
+                        <select class="field-select" id="province" onchange="loadDistricts(this.value)">
+                            <option value="" disabled <?php echo $address_num == 0 ? 'selected' : ''; ?> hidden></option>
                             <?php while($p = $province_rs->fetch_assoc()) { ?>
                                 <option value="<?php echo $p['id']; ?>"
-                                    <?php echo ($address_data['province_name'] == $p['name']) ? 'selected' : ''; ?>>
+                                    <?php echo (($address_data['province_name'] ?? '') == $p['name']) ? 'selected' : ''; ?>>
                                     <?php echo $p['name']; ?>
                                 </option>
                             <?php } ?>
@@ -178,19 +179,19 @@ session_start();
 
                 <!-- postal code -->
                 <div class="field-wrap">
-                    <input class="field-input" value="<?php echo $address_data['postal_code'] ?? ''; ?>" type="text" id="" placeholder=" " />
+                    <input class="field-input" value="<?php echo $address_data['postal_code'] ?? ''; ?>" type="text" id="pcode" placeholder=" " />
                     <label class="field-label" for="" >Postal code</label>
                 </div>
 
                 <!-- contact -->
                 <div class="field-wrap">
-                    <input class="field-input" value="<?php echo $address_data['contact1'] ?? ''; ?>" type="text" id="" placeholder=" " />
+                    <input class="field-input" value="<?php echo $address_data['contact1'] ?? ''; ?>" type="text" id="contact1" placeholder=" " />
                     <label class="field-label" for="" >Contact 1</label>
                 </div>
 
                 <!-- contact -->
                 <div class="field-wrap">
-                    <input class="field-input" value="<?php echo $address_data['contact2'] ?? ''; ?>" type="text" id="" placeholder=" " />
+                    <input class="field-input" value="<?php echo $address_data['contact2'] ?? ''; ?>" type="text" id="contact2" placeholder=" " />
                     <label class="field-label" for="" >Contact 2</label>
                 </div>
                 
@@ -221,12 +222,112 @@ session_start();
                 pwicon.className = "bi bi-eye-slash";
             }
         }
+
         document.querySelectorAll('.field-select').forEach(select => {
             if (select.value !== '') select.classList.add('has-value');
             select.addEventListener('change', function() {
                 this.classList.toggle('has-value', this.value !== '');
             });
         });
+
+        window.addEventListener('load', function() {
+            var province = document.getElementById('province');
+            if (province.value !== '') {
+                loadDistricts(province.value, <?php echo $address_data['district_id'] ?? 'null'; ?>);
+            }
+        });
+
+        function checkProvince(event) {
+            var province = document.getElementById('province').value;
+            if (!province) {
+                event.preventDefault();
+                showToast('⚠ Please select a province first');
+            }
+        }
+
+        function loadDistricts(provinceId, selectedId = null) {
+            var districtSelect = document.getElementById('district');
+            districtSelect.disabled = true;
+            districtSelect.innerHTML = '<option value="" disabled selected hidden></option>';
+
+            if (!provinceId) return;
+
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if (req.readyState == 4 && req.status == 200) {
+                    var districts = JSON.parse(req.responseText);
+                    districts.forEach(function(d) {
+                        var selected = selectedId && d.id == selectedId ? 'selected' : '';
+                        districtSelect.innerHTML += '<option value="' + d.id + '" ' + selected + '>' + d.name + '</option>';
+                    });
+                    districtSelect.disabled = false;
+                    if (selectedId) districtSelect.classList.add('has-value');
+                }
+            }
+            req.open('GET', 'processes/getDistrictsProcess.php?province_id=' + provinceId, true);
+            req.send();
+        }
+
+        function saveProfileDetails() {
+            var fullname = document.getElementById('customer_fullname').value.trim();
+            
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function() {
+                if (request.readyState == 4 && request.status == 200) {
+                    var response = request.responseText;
+                    if (response == "success") {
+                        showToast("Profile updated! ✓", "success");
+                        location.reload();
+                    } else {
+                        showToast("⚠ " + response);
+                    }
+                }
+            }
+            request.open("POST", "processes/customerProfileDetailsProcess.php", true);
+            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            request.send("fullname=" + encodeURIComponent(fullname));
+        }
+
+        function saveAddressDetails() {
+            var line1    = document.getElementById('line1').value.trim();
+            var line2    = document.getElementById('line2').value.trim();
+            var city     = document.getElementById('city').value.trim();
+            var district = document.getElementById('district').value;
+            var province = document.getElementById('province').value;
+            var pcode    = document.getElementById('pcode').value.trim();
+            var contact1 = document.getElementById('contact1').value.trim();
+            var contact2 = document.getElementById('contact2').value.trim();
+
+            if (!line1)    { showToast('⚠ Line 01 cannot be empty'); return; }
+            if (!city)     { showToast('⚠ City cannot be empty'); return; }
+            if (!province) { showToast('⚠ Please select a province'); return; }
+            if (!district) { showToast('⚠ Please select a district'); return; }
+            if (!contact1) { showToast('⚠ Contact 1 cannot be empty'); return; }
+
+            var form = new FormData();
+            form.append('line1', line1);
+            form.append('line2', line2);
+            form.append('city', city);
+            form.append('district', district);
+            form.append('province', province);
+            form.append('pcode', pcode);
+            form.append('contact1', contact1);
+            form.append('contact2', contact2);
+
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function() {
+                if (request.readyState == 4 && request.status == 200) {
+                    if (request.responseText == 'success') {
+                        showToast('Address saved! ✓', 'success');
+                        location.reload();
+                    } else {
+                        showToast('⚠ ' + request.responseText);
+                    }
+                }
+            }
+            request.open('POST', 'processes/customerAddressDetails.php', true);
+            request.send(form);
+        }
     </script>
 </body>
 
