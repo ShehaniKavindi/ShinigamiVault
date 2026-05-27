@@ -92,6 +92,20 @@ session_start();
         </div>
         <br>
         <div class="profile-details">
+            <?php
+            $address_rs = Database::search("
+                SELECT 
+                    a.line1, a.line2, a.city, a.postal_code, a.contact1, a.contact2,
+                    d.name as district_name,
+                    p.name as province_name
+                FROM address a
+                LEFT JOIN district d ON d.id = a.district_id
+                LEFT JOIN province p ON p.id = d.province_id
+                WHERE a.customer_id = '$customer_id'
+            ");
+            $address_num = $address_rs->num_rows;
+            $address_data = $address_rs->fetch_assoc();
+            ?>
             <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 1.5rem;">
                 <h5 class="profile-headings">Shipping Details</h5>
                 <button class="saveChanges-btn">save shipping details</button>
@@ -100,90 +114,83 @@ session_start();
             <div class="form-row">
                 <!-- line 2 -->
                 <div class="field-wrap">
-                    <input class="field-input" value="customer fullname" type="text" id="" placeholder=" " />
+                    <input class="field-input" value="<?php echo $address_data['line1'] ?? ''; ?>" type="text" id="" placeholder=" " />
                     <label class="field-label" for="" >Line 01</label>
                 </div>
                 <!-- line 2 -->
                 <div class="field-wrap">
-                    <input class="field-input" value="customer fullname" type="text" id="" placeholder=" " />
+                    <input class="field-input" value="<?php echo $address_data['line2'] ?? ''; ?>" type="text" id="" placeholder=" " />
                     <label class="field-label" for="" >Line 02</label>
                 </div>
 
                 <!-- city -->
-                <div class="field-wrap field-select-wrap">
-                    <select class="field-select" id="" >
-                        <option value="" disabled selected hidden></option>
-                        <option value="1">city</option>
-                    </select>
-                    <label class="field-label" for="">City</label>
-                    <span class="chevron">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.2">
-                            <polyline points="6 9 12 15 18 9" />
-                        </svg>
-                    </span>
-                </div>
-                <!-- if user has city -->
-                <!-- <div class="field-wrap">
-                    <input class="field-input" value="customer fullname" type="text" id="" placeholder=" " />
+                <div class="field-wrap">
+                    <input class="field-input" value="<?php echo $address_data['city'] ?? ''; ?>" type="text" id="" placeholder=" " />
                     <label class="field-label" for="" >City</label>
-                </div> -->
+                </div>
+                
 
                 <!-- disctrict -->
-                <div class="field-wrap field-select-wrap">
-                    <select class="field-select" id="" >
-                        <option value="" disabled selected hidden></option>
-                        <option value="1">city</option>
-                    </select>
-                    <label class="field-label" for="">District</label>
-                    <span class="chevron">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.2">
-                            <polyline points="6 9 12 15 18 9" />
-                        </svg>
-                    </span>
-                </div>
-                <!-- if user has disctrict -->
-                <!-- <div class="field-wrap">
-                    <input class="field-input" value="customer fullname" type="text" id="" placeholder=" " />
-                    <label class="field-label" for="" >District</label>
-                </div> -->
+                <?php 
+                $districts_rs = Database::search("SELECT id, name FROM district ORDER BY name");
+                    ?>
+                    <div class="field-wrap field-select-wrap">
+                        <select class="field-select" id="district">
+                            <option value="" disabled <?php echo $address_num == 0 ? 'selected' : ''; ?> hidden>Select district</option>
+                            <?php while($d = $districts_rs->fetch_assoc()) { ?>
+                                <option value="<?php echo $d['id']; ?>"
+                                    <?php echo ($address_data['district_name'] == $d['name']) ? 'selected' : ''; ?>>
+                                    <?php echo $d['name']; ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                        <label class="field-label" for="district">District</label>
+                        <span class="chevron">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2">
+                                <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                        </span>
+                    </div>
 
                 <!-- provice -->
-                <div class="field-wrap field-select-wrap">
-                    <select class="field-select" id="" >
-                        <option value="" disabled selected hidden></option>
-                        <option value="1">city</option>
-                    </select>
-                    <label class="field-label" for="">Province</label>
-                    <span class="chevron">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.2">
-                            <polyline points="6 9 12 15 18 9" />
-                        </svg>
-                    </span>
-                </div>
-                <!-- if user has province -->
-                <!-- <div class="field-wrap">
-                    <input class="field-input" value="customer fullname" type="text" id="" placeholder=" " />
-                    <label class="field-label" for="" >Province</label>
-                </div> -->
+                <?php 
+                $province_rs = Database::search("SELECT id, name FROM province ORDER BY name");
+                    ?>
+                    <div class="field-wrap field-select-wrap">
+                        <select class="field-select" id="province">
+                            <option value="" disabled <?php echo $address_num == 0 ? 'selected' : ''; ?> hidden>Select province</option>
+                            <?php while($p = $province_rs->fetch_assoc()) { ?>
+                                <option value="<?php echo $p['id']; ?>"
+                                    <?php echo ($address_data['province_name'] == $p['name']) ? 'selected' : ''; ?>>
+                                    <?php echo $p['name']; ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                        <label class="field-label" for="province">Province</label>
+                        <span class="chevron">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2">
+                                <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                        </span>
+                    </div>
 
                 <!-- postal code -->
                 <div class="field-wrap">
-                    <input class="field-input" value="customer fullname" type="text" id="" placeholder=" " />
+                    <input class="field-input" value="<?php echo $address_data['postal_code'] ?? ''; ?>" type="text" id="" placeholder=" " />
                     <label class="field-label" for="" >Postal code</label>
                 </div>
 
                 <!-- contact -->
                 <div class="field-wrap">
-                    <input class="field-input" value="customer fullname" type="text" id="" placeholder=" " />
+                    <input class="field-input" value="<?php echo $address_data['contact1'] ?? ''; ?>" type="text" id="" placeholder=" " />
                     <label class="field-label" for="" >Contact 1</label>
                 </div>
 
                 <!-- contact -->
                 <div class="field-wrap">
-                    <input class="field-input" value="customer fullname" type="text" id="" placeholder=" " />
+                    <input class="field-input" value="<?php echo $address_data['contact2'] ?? ''; ?>" type="text" id="" placeholder=" " />
                     <label class="field-label" for="" >Contact 2</label>
                 </div>
                 
@@ -214,6 +221,12 @@ session_start();
                 pwicon.className = "bi bi-eye-slash";
             }
         }
+        document.querySelectorAll('.field-select').forEach(select => {
+            if (select.value !== '') select.classList.add('has-value');
+            select.addEventListener('change', function() {
+                this.classList.toggle('has-value', this.value !== '');
+            });
+        });
     </script>
 </body>
 
@@ -339,7 +352,8 @@ session_start();
             color: var(--red);
         }
 
-        .field-input, .field-select{
+        .field-input,
+        .field-select{
             width: 100%;
             height: 58px;
             border: 1.5px solid #dcdcdc;
@@ -354,6 +368,7 @@ session_start();
             appearance: none;
             transition: border-color 0.22s ease, box-shadow 0.22s ease;
         }
+       
         .field-input:focus,
         .field-select:focus {
             border-color: var(--dark-grey);

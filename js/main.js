@@ -35,6 +35,9 @@ function gotoHome() {
 function gotoProfile(){
     window.location = "customerProfile.php";
 }
+function gotoIndex(){
+    window.location = "index.php";
+}
 
 // ============== Toast Box ===========
 function showToast(msg, type = 'error') {

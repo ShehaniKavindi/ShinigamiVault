@@ -35,7 +35,7 @@
             <span class="cart-count"><?php echo $cart_num; ?></span>
         <?php }
         } ?>
-        
+
         <?php
         if (isset($_SESSION['customer_id'])) {
             ?>
@@ -43,7 +43,7 @@
             <?php
         }else {
             ?>
-            <i class="bi bi-person" onclick=" showLogin();"></i>
+            <i class="bi bi-person" onclick="gotoIndex();"></i>
             <?php
         }?>
         
