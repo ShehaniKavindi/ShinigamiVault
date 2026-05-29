@@ -5,9 +5,9 @@
     </div>
     <div class="brand-headers">
         <a href="home.php"> Home</a>
-        <a href=""> Oversized</a>
-        <a href=""> Hoodies</a>
-        <a href=""> Collections</a>
+        <a href="search.php?search=oversized">Oversized</a>
+        <a href="search.php?search=hoodie">Hoodies</a>
+        <a href="collection.php"> Collections</a>
         <a href=""> Discover Us</a>
     </div>
     <div class="header-btns">
