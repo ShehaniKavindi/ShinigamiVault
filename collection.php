@@ -28,7 +28,7 @@
             <p class="hero-sub">buy yours today</p>
         </div>
 
-        <div class="collections-grid">
+        <div class="vault-ledger">
 
             <?php
             $collection_rs = Database::search("SELECT 
@@ -47,10 +47,12 @@
             for ($c=0; $c < $collection_num; $c++) { 
                 $collection_data = $collection_rs->fetch_assoc();
                 $c_id = $collection_data["id"];
+                $entry_no = str_pad($c + 1, 2, "0", STR_PAD_LEFT);
                 ?>
-                <div class="col-card" >
-                    <div class="col-bg">
-                        <div class="col-placeholder">
+                <div class="entry">
+                    <div class="entry-collage">
+                        <span class="entry-watermark"><?php echo $entry_no; ?></span>
+                        <div class="pinboard">
                             <?php 
                                 $images_rs = Database::search("SELECT 
                                     p.id AS product_id,
@@ -64,24 +66,34 @@
 
                                 $images_num = $images_rs->num_rows;
 
-                                for ($i=0; $i < $images_num; $i++) { 
-                                    $images_data = $images_rs->fetch_assoc();
+                                if ($images_num === 0) {
                                     ?>
-                                    <div class="mini-product" style="background:#e8e8e8;">
-                                        <img src="<?php echo $images_data['image']; ?>" alt="">
+                                    <div class="pin-empty">
+                                        <span>drop pending</span>
                                     </div>
                                     <?php
+                                } else {
+                                    for ($i=0; $i < $images_num; $i++) { 
+                                        $images_data = $images_rs->fetch_assoc();
+                                        ?>
+                                        <div class="pin-photo">
+                                            <img src="<?php echo $images_data['image']; ?>" alt="<?php echo htmlspecialchars($images_data['title']); ?>">
+                                        </div>
+                                        <?php
+                                    }
                                 }
                             ?>
-                            
                         </div>
                     </div>
-                    <div class="col-overlay">
-                        <p class="col-badge">anime collection</p>
-                        <h2 class="col-name"><?php echo $collection_data["name"]; ?></h2>
-                        <p class="col-count"><?php echo $collection_data["product_count"]; ?> pieces</p>
-                        <a href="search.php?search=<?php echo $collection_data['name']; ?>">
-                            <button class="col-btn" >explore →</button>
+                    <div class="entry-record">
+                        <span class="entry-tag">case file</span>
+                        <h2 class="entry-name"><?php echo $collection_data["name"]; ?></h2>
+                        <div class="entry-meta">
+                            <span class="entry-stamp"><?php echo $entry_no; ?> / <?php echo str_pad($collection_num, 2, "0", STR_PAD_LEFT); ?></span>
+                            <span class="entry-count"><?php echo $collection_data["product_count"]; ?> piece<?php echo $collection_data["product_count"] == 1 ? '' : 's'; ?> logged</span>
+                        </div>
+                        <a class="entry-link" href="search.php?search=<?php echo $collection_data['name']; ?>">
+                            <span class="entry-link-bracket">[</span> view collection <span class="entry-link-bracket">]</span>
                         </a>
                     </div>
                 </div>
@@ -147,121 +159,193 @@
         letter-spacing: 0.15em;
     }
 
-    .collections-grid {
+    /* ---- vault ledger ---- */
+
+    .vault-ledger {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 10px 40px 100px;
+    }
+
+    .entry {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2px;
-        padding: 2px;
-        background: #e8e8e8;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 60px;
+        align-items: center;
+        padding: 64px 0;
+        border-bottom: 1px solid #ddd9d1;
     }
 
-    .col-card {
+    .entry:first-child {
+        padding-top: 48px;
+    }
+
+    .entry:nth-child(even) {
+        grid-template-columns: 1fr 1.1fr;
+    }
+
+    .entry:nth-child(even) .entry-collage {
+        order: 2;
+    }
+
+    /* collage side */
+
+    .entry-collage {
         position: relative;
-        height: 340px;
+        min-height: 320px;
+        display: flex;
+        align-items: center;
+    }
+
+    .entry-watermark {
+        position: absolute;
+        top: -30px;
+        left: -10px;
+        font-family: 'Courier New', monospace;
+        font-size: 130px;
+        font-weight: 700;
+        color: #000;
+        opacity: 0.05;
+        line-height: 1;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .pinboard {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0;
+        padding-left: 30px;
+    }
+
+    .pin-photo {
+        position: relative;
+        width: 150px;
+        height: 190px;
+        background: #eceae5;
+        border: 6px solid #fff;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+        margin: 0 -20px 14px 0;
         overflow: hidden;
-        cursor: pointer;
-        background: #f0f0f0;
     }
 
-    .col-card.wide {
-        grid-column: span 2;
-        height: 260px;
+    .pin-photo:nth-of-type(odd) { transform: rotate(-4deg); }
+    .pin-photo:nth-of-type(even) { transform: rotate(3deg); margin-top: 26px; }
+    .pin-photo:nth-of-type(3n) { transform: rotate(-2deg); margin-top: 12px; }
+
+    .pin-photo::before {
+        content: "";
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 16px;
+        height: 8px;
+        background: var(--red, #e23d3d);
+        z-index: 2;
     }
 
-    .col-bg {
+    .pin-photo img {
         width: 100%;
         height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .pin-empty {
+        width: 220px;
+        height: 190px;
+        margin-left: 10px;
+        border: 1px dashed #c9c4ba;
         display: flex;
         align-items: center;
         justify-content: center;
+        color: #b3ada0;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        letter-spacing: 0.08em;
     }
 
-    .col-placeholder {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-        padding: 20px;
-        width: 100%;
-        height: 100%;
+    /* record side */
+
+    .entry-record {
+        position: relative;
     }
 
-    .col-placeholder.wide-grid {
-        grid-template-columns: repeat(5, 1fr);
-    }
-
-    .mini-product {
-        border-radius: 4px;
-    }
-
-    .mini-product img{
-        width: 100%;
-        object-fit: cover;
-    }
-
-    .col-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to top, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.5) 55%, transparent 100%);
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        padding: 24px;
-        transition: background 0.3s;
-    }
-    .col-overlay a{
-        width: 100%;
-    }
-
-    .col-card:hover .col-overlay {
-        background: linear-gradient(to top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.75) 60%, rgba(255, 255, 255, 0.1) 100%);
-    }
-
-    .col-badge {
-        font-size: 10px;
-        letter-spacing: 0.2em;
-        color: #e03535;
-        margin-bottom: 8px;
-    }
-
-    .col-name {
-        font-size: 26px;
-        font-weight: 900;
-        color: #111;
-        letter-spacing: 0.06em;
-        line-height: 1;
-        margin-bottom: 6px;
-    }
-
-    .col-count {
+    .entry-tag {
+        display: inline-block;
+        font-family: 'Courier New', monospace;
         font-size: 11px;
-        color: #aaa;
-        letter-spacing: 0.1em;
-        margin-bottom: 16px;
+        letter-spacing: 0.18em;
+        color: var(--red, #e23d3d);
+        border: 1px solid var(--red, #e23d3d);
+        padding: 3px 10px;
+        margin-bottom: 18px;
     }
 
-    .col-btn {
+    .entry-name {
+        font-family: 'header', sans-serif;
+        font-size: 42px;
+        color: #111;
+        letter-spacing: 0.02em;
+        line-height: 1.05;
+        margin-bottom: 18px;
+        text-transform: lowercase;
+    }
+
+    .entry-meta {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: #928d81;
+        letter-spacing: 0.04em;
+        padding-bottom: 22px;
+        margin-bottom: 22px;
+        border-bottom: 1px solid #e3dfd6;
+    }
+
+    .entry-stamp {
+        color: #111;
+        font-weight: 700;
+    }
+
+    .entry-link {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        font-size: 10px;
-        letter-spacing: 0.2em;
+        gap: 4px;
+        font-size: 13px;
+        letter-spacing: 0.05em;
         color: #111;
-        border: 1px solid #ccc;
-        padding: 7px 16px;
-        opacity: 0;
-        transform: translateY(8px);
-        transition: all 0.3s;
-        background: transparent;
-        cursor: pointer;
-        width: 100%;
+        text-decoration: none;
+        padding-bottom: 3px;
+        border-bottom: 1px solid #111;
+        transition: color 0.2s, border-color 0.2s;
     }
 
-    .col-card:hover .col-btn {
-        opacity: 1;
-        transform: translateY(0);
-        border-color: #e03535;
-        color: #e03535;
+    .entry-link-bracket {
+        color: var(--red, #e23d3d);
+        font-family: 'Courier New', monospace;
     }
 
+    .entry-link:hover {
+        color: var(--red, #e23d3d);
+        border-color: var(--red, #e23d3d);
+    }
+
+    @media (max-width: 860px) {
+        .vault-ledger { padding: 10px 20px 70px; }
+        .entry, .entry:nth-child(even) {
+            grid-template-columns: 1fr;
+            gap: 28px;
+            padding: 44px 0;
+        }
+        .entry:nth-child(even) .entry-collage { order: 0; }
+        .entry-watermark { font-size: 90px; top: -18px; }
+        .entry-name { font-size: 32px; }
+    }
 
 </style>
