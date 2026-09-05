@@ -130,7 +130,7 @@
 <style>
 
     .discover-container {
-        background: var(--white);
+        background: var(--bg);
     }
 
     /* manifesto */
@@ -153,7 +153,7 @@
     .manifesto-title {
         font-family: 'header';
         font-size: 50px;
-        color: var(--black);
+        color: var(--heading);
         line-height: 1.15;
         letter-spacing: 0.01em;
         margin-bottom: 18px;
@@ -184,7 +184,7 @@
 
     .origin-note {
         position: relative;
-        background: var(--light-bg);
+        background: var(--surface-alt);
         padding: 44px 40px;
         border-left: 3px solid var(--red);
     }
@@ -201,7 +201,7 @@
     .note-line {
         font-size: 15px;
         line-height: 1.75;
-        color: var(--dark-grey);
+        color: var(--text);
         margin-bottom: 18px;
     }
 
@@ -226,7 +226,7 @@
     /* vault rules */
 
     .rules-section {
-        background: var(--hero-bg);
+        background: var(--surface);
         padding: 80px 40px;
     }
 
@@ -245,11 +245,11 @@
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 1px;
-        background: #ddd7cb;
+        background: var(--border);
     }
 
     .rule-card {
-        background: var(--hero-bg);
+        background: var(--surface);
         padding: 30px 26px;
     }
 
@@ -264,7 +264,7 @@
     .rule-title {
         font-family: 'header';
         font-size: 19px;
-        color: var(--black);
+        color: var(--heading);
         text-transform: lowercase;
         margin-bottom: 10px;
         line-height: 1.2;
@@ -289,7 +289,7 @@
 
     .ledger-stat {
         text-align: center;
-        border-left: 1px solid #e6e2d9;
+        border-left: 1px solid var(--border);
         padding: 0 10px;
     }
 
@@ -301,7 +301,7 @@
         display: block;
         font-family: 'header';
         font-size: 40px;
-        color: var(--black);
+        color: var(--heading);
         line-height: 1;
         margin-bottom: 10px;
     }
@@ -322,7 +322,7 @@
     .discover-cta h2 {
         font-family: 'header';
         font-size: 30px;
-        color: var(--black);
+        color: var(--heading);
         margin-bottom: 26px;
         text-transform: lowercase;
     }
@@ -333,10 +333,10 @@
         gap: 6px;
         font-size: 14px;
         letter-spacing: 0.05em;
-        color: var(--black);
+        color: var(--heading);
         text-decoration: none;
         padding-bottom: 4px;
-        border-bottom: 1px solid var(--black);
+        border-bottom: 1px solid var(--heading);
         transition: color 0.2s, border-color 0.2s;
     }
 

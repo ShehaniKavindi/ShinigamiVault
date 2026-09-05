@@ -59,4 +59,19 @@ function showToast(msg, type = 'error') {
     setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+// ============== Dark Mode ===========
+function updateThemeIcon() {
+    const icon = document.getElementById('theme-toggle-icon');
+    if (!icon) return;
+    const isDark = document.documentElement.classList.contains('dark-mode');
+    icon.className = isDark ? 'bi bi-moon-stars-fill' : 'bi bi-brightness-high';
+}
 
+function toggleDarkMode() {
+    document.documentElement.classList.toggle('dark-mode');
+    const isDark = document.documentElement.classList.contains('dark-mode');
+    localStorage.setItem('sv-theme', isDark ? 'dark' : 'light');
+    updateThemeIcon();
+}
+
+document.addEventListener('DOMContentLoaded', updateThemeIcon);

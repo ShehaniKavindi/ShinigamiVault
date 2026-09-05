@@ -6,6 +6,30 @@
 
     --light-bg: #efeded;
     --hero-bg: #f2f2f0;
+
+    /* adaptive tokens - these are the ones that flip in dark mode.
+       --black / --white / --red stay constant (used for text-on-accent-color,
+       so flipping them would break contrast on red/black buttons) */
+    --bg: #ffffff;
+    --surface: #f7f7f5;
+    --surface-alt: #efeded;
+    --text: #2a2a2a;
+    --heading: #000000;
+    --border: #f0eeee;
+}
+
+html.dark-mode {
+    --bg: #121212;
+    --surface: #1b1b1b;
+    --surface-alt: #181818;
+    --text: #d6d3cd;
+    --heading: #f5f3ef;
+    --border: #2b2b2b;
+}
+
+body {
+    background: var(--bg);
+    transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 @font-face {
@@ -20,7 +44,7 @@
 
 * {
     font-family: 'sub';
-    color: var(--dark-grey);
+    color: var(--text);
 }
 
 /* toast */
@@ -86,11 +110,15 @@
     width: 100%;
     height: 2.9rem;
     border-radius: 5px;
-    border: none;
+    border: 1px solid transparent;
     background-color: var(--black);
     color: var(--white);
     letter-spacing: 1px;
     font-size: 0.9rem;
+}
+
+html.dark-mode .primary-btn {
+    border-color: #333;
 }
 
 .primary-btn i{
@@ -105,7 +133,7 @@
 .search-wrapper {
     display: flex;
     align-items: center;
-    border: 1px solid var(--dark-grey);
+    border: 1px solid var(--text);
     border-radius: 4px;
     padding: 10px 16px;
 }
@@ -116,7 +144,7 @@
     flex: 1;
     font-size: 13px;
     letter-spacing: 0.08em;
-    color: var(--dark-grey);
+    color: var(--text);
     background: transparent;
     text-transform: uppercase;
 }
@@ -138,7 +166,7 @@
 }
 
 .search-wrapper button:hover {
-    color: var(--black);
+    color: var(--heading);
 }
 
 .search-wrapper .bi-search {
@@ -159,18 +187,18 @@
 .fieldset input {
     width: 100%;
     height: 3.2rem;
-    border: 1px solid var(--dark-grey);
+    border: 1px solid var(--text);
     border-radius: 5px;
     padding: 1.2rem 2.5rem 0.4rem 1rem;
     font-size: 0.85rem;
-    color: var(--dark-grey);
+    color: var(--text);
     background: transparent;
     box-sizing: border-box;
 }
 
 .fieldset input:focus {
     outline: none;
-    border-color: var(--black);
+    border-color: var(--heading);
 }
 
 .input-wrapper label {
@@ -179,10 +207,10 @@
     top: 50%;
     transform: translateY(-50%);
     font-size: 0.8rem;
-    color: var(--dark-grey);
+    color: var(--text);
     pointer-events: none;
     transition: all 0.2s ease;
-    background: var(--white);
+    background: var(--bg);
     padding: 0 0.25rem;
     letter-spacing: 0.05em;
 }
@@ -191,7 +219,7 @@
 .input-wrapper input:not(:placeholder-shown)+label {
     top: 0;
     font-size: 0.68rem;
-    color: var(--dark-grey);
+    color: var(--text);
 }
 
 .fieldset .show-pw-btn {
@@ -206,11 +234,11 @@
 }
 
 .fieldset .show-pw-btn i {
-    color: var(--dark-grey);
+    color: var(--text);
 }
 
 .fieldset .show-pw-btn i:hover {
-    color: var(--black);
+    color: var(--heading);
 }
 
 
@@ -250,11 +278,11 @@
     -webkit-box-orient: vertical;
 }
 .product-details a{
-    color: var(--dark-grey);
+    color: var(--text);
     text-decoration: none;
 }
 .product-details a:hover{
-    color: var(--black);
+    color: var(--heading);
     text-decoration: underline;
 }
 .product-details h5{
@@ -272,13 +300,13 @@
     left: 0;
     height: 10vh;
     width: 100%;
-    background-color: var(--white);
+    background-color: var(--surface);
     display: flex;
     justify-content: space-around;
     align-items: center;
     padding: 0 20px;
     z-index: 1;
-    border-bottom: 1px solid #f0eeee;
+    border-bottom: 1px solid var(--border);
     box-shadow: 0 0 15px 2px #c4c4c491;
 }
 
@@ -288,14 +316,14 @@
 }
 
 .brand-headers a {
-    color: var(--dark-grey);
+    color: var(--text);
     text-decoration: none;
     padding: 0 15px;
 }
 
 .brand-headers a:hover {
     cursor: pointer;
-    color: var(--black);
+    color: var(--heading);
 }
 
 .header-btns {
@@ -305,7 +333,7 @@
 .header-btns i {
     padding: 0 8px;
     font-size: 1.15rem;
-    color: var(--dark-grey);
+    color: var(--text);
 }
 
 .header-btns i:hover {
@@ -319,7 +347,7 @@
 /* ================ footer =================== */
 .footer {
     width: 100%;
-    background-color: var(--light-bg);
+    background-color: var(--surface-alt);
     height: 3vh;
     display: flex;
     justify-content: center;
@@ -331,7 +359,7 @@
 .footer p {
     font-size: 0.72rem;
     letter-spacing: 1px;
-    color: var(--dark-grey);
+    color: var(--text);
 }
 
 /* ================ footer =================== */

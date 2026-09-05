@@ -1,4 +1,9 @@
 <!-- header -->
+<script>
+    if (localStorage.getItem('sv-theme') === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+    }
+</script>
 <header class="header">
     <div class="brand-name">
         <h1>SHINIGAMI VAULT</h1>
@@ -12,7 +17,7 @@
     </div>
     <div class="header-btns">
         <i class="bi bi-search" onclick="gotoSearch();"></i>
-        <i class="bi bi-brightness-high"></i>
+        <i id="theme-toggle-icon" class="bi bi-brightness-high" onclick="toggleDarkMode();"></i>
         <i class="bi bi-bag" onclick="openCart()"></i>
         <?php
         if (isset($_SESSION['customer_id'])) {

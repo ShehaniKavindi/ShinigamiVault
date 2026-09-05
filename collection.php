@@ -122,15 +122,15 @@
 <style>
 
     .collection-container {
-        background: #f8f8f8;
+        background: var(--bg);
         min-height: 100vh;
     }
 
     .hero {
-        background: #fff;
+        background: var(--surface);
         padding: 60px 40px 40px;
         text-align: center;
-        border-bottom: 1px solid #e8e8e8;
+        border-bottom: 1px solid var(--border);
     }
 
     .hero-label {
@@ -143,7 +143,7 @@
     .hero-title {
         font-size: 52px;
         font-weight: 900;
-        color: #111;
+        color: var(--heading);
         letter-spacing: 0.08em;
         line-height: 1;
         margin-bottom: 10px;
@@ -173,7 +173,7 @@
         gap: 60px;
         align-items: center;
         padding: 64px 0;
-        border-bottom: 1px solid #ddd9d1;
+        border-bottom: 1px solid var(--border);
     }
 
     .entry:first-child {
@@ -204,7 +204,7 @@
         font-family: 'Courier New', monospace;
         font-size: 130px;
         font-weight: 700;
-        color: #000;
+        color: var(--heading);
         opacity: 0.05;
         line-height: 1;
         pointer-events: none;
@@ -288,7 +288,7 @@
     .entry-name {
         font-family: 'header', sans-serif;
         font-size: 42px;
-        color: #111;
+        color: var(--heading);
         letter-spacing: 0.02em;
         line-height: 1.05;
         margin-bottom: 18px;
@@ -305,11 +305,11 @@
         letter-spacing: 0.04em;
         padding-bottom: 22px;
         margin-bottom: 22px;
-        border-bottom: 1px solid #e3dfd6;
+        border-bottom: 1px solid var(--border);
     }
 
     .entry-stamp {
-        color: #111;
+        color: var(--heading);
         font-weight: 700;
     }
 
@@ -319,10 +319,10 @@
         gap: 4px;
         font-size: 13px;
         letter-spacing: 0.05em;
-        color: #111;
+        color: var(--heading);
         text-decoration: none;
         padding-bottom: 3px;
-        border-bottom: 1px solid #111;
+        border-bottom: 1px solid var(--heading);
         transition: color 0.2s, border-color 0.2s;
     }
 

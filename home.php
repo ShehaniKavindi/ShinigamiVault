@@ -131,7 +131,10 @@
 
     <!-- newly arrivals -->
     <div class="new-arrivals-section">
-        <h2>⮜----⪻ &nbsp; Newly Arrivals &nbsp; ⪼----⮞</h2>
+        <div class="section-heading">
+            <p class="section-eyebrow">fresh in the vault</p>
+            <h2 class="section-title">newly <span>arrivals</span></h2>
+        </div>
         <!-- product container -->
         <div class="products-container">
             <div class="row row-cols-3 d-flex justify-content-center" style="margin-left: 1rem; margin-right: 1rem;">
@@ -186,6 +189,54 @@
             </ul>
             <div class="hero-image">
                 <img src="assets/hero.png" alt="">
+            </div>
+        </div>
+    </div>
+
+    <!-- hoodies -->
+    <div class="hoodies-section">
+        <div class="section-heading">
+            <p class="section-eyebrow">gear up</p>
+            <h2 class="section-title">the <span>hoodies</span></h2>
+        </div>
+        <!-- product container -->
+        <div class="products-container">
+            <div class="row row-cols-3 d-flex justify-content-center" style="margin-left: 1rem; margin-right: 1rem;">
+                <?php 
+                    $hoodies_rs = Database::search("
+                        SELECT p.id, p.title, MIN(pi.path) as path, MIN(i.unit_price) as unit_price, col.name as collection_name
+                        FROM product p
+                        JOIN product_images pi ON pi.product_id = p.id
+                        JOIN inventory i ON i.product_id = p.id
+                        JOIN collection col ON col.id = p.collection_id
+                        WHERE p.title LIKE '%hoodie%'
+                        GROUP BY p.id, p.title, col.name
+                        ORDER BY p.id DESC
+                        LIMIT 3
+                    ");
+
+                    while($hoodies_data = $hoodies_rs->fetch_assoc()) { ?>
+                        <div class="product-card col">
+                            <div class="product-image">
+                                <img src="<?php echo $hoodies_data['path']; ?>" alt="">
+                            </div>
+                            <div class="product-details">
+                                <h6><a href="singleProductView.php?id=<?php echo $hoodies_data['id']; ?>">
+                                    <?php echo $hoodies_data['collection_name'] . '&nbsp; | &nbsp;' . $hoodies_data['title']; ?>
+                                </a></h6>
+                                <h5>LKR. <?php echo number_format($hoodies_data['unit_price'], 2); ?></h5>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <div class="col-10 mt-2">
+                                    <button class="primary-btn">Add to Bag</button>
+                                </div>
+                            </div>
+                        </div>
+                    <?php } ?>
+
+            </div>
+            <div class="d-flex justify-content-center">
+                <a class="view-more-link" href="search.php?search=hoodie">view more hoodies</a>
             </div>
         </div>
     </div>
@@ -330,10 +381,56 @@
         min-height: 60vh;
     }
 
-    .new-arrivals-section h2 {
-        margin-top: 2rem;
+    /* hoodies */
+    .hoodies-section {
+        width: 100%;
+        min-height: 60vh;
+    }
+
+    /* shared section heading (eyebrow + title) */
+    .section-heading {
         text-align: center;
+        padding-top: 3rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: #b0aaa0;
+        margin-bottom: 10px;
+    }
+
+    .section-title {
         font-family: 'header';
+        font-size: 2.4rem;
+        color: var(--heading);
+        letter-spacing: 0.02em;
+        text-transform: lowercase;
+        margin: 0;
+    }
+
+    .section-title span {
+        color: var(--red);
+    }
+
+    .view-more-link {
+        display: inline-block;
+        margin-top: 0.5rem;
+        margin-bottom: 2rem;
+        font-size: 0.85rem;
+        letter-spacing: 0.05em;
+        color: var(--text);
+        text-decoration: none;
+        padding-bottom: 3px;
+        border-bottom: 1px solid var(--text);
+        transition: color 0.2s, border-color 0.2s;
+    }
+
+    .view-more-link:hover {
+        color: var(--red);
+        border-color: var(--red);
     }
 
     /* hero section */
