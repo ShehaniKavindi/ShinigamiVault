@@ -59,7 +59,12 @@ function showToast(msg, type = 'error') {
     setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ============== Dark Mode ===========
+// ============== Checkout ===========
+function checkout() {
+    window.location.href = "checkout.php?mode=cart";
+}
+
+
 function updateThemeIcon() {
     const icon = document.getElementById('theme-toggle-icon');
     if (!icon) return;

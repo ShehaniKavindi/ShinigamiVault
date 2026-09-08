@@ -175,7 +175,7 @@ $product = $product_rs->fetch_assoc();
                     Add to bag
                 </button>
 
-                <button class="buynow-btn" type="button">Buy now</button>
+                <button class="buynow-btn" type="button" onclick="BuyNow();">Buy now</button>
             </div>
         </div>
 
@@ -441,6 +441,37 @@ $product = $product_rs->fetch_assoc();
             }
             request.open("POST", "processes/addToCartProcess.php", true);
             request.send(form);
+        }
+
+        function BuyNow() {
+            const activeSize = document.querySelector(".size-btn.active");
+            const activeColor = document.querySelector(".color-btn.active");
+
+            if(!activeSize || !activeColor) {
+                showToast("⚠ Please select a size and color!");
+                return;
+            }
+
+            const selectedSize = activeSize.textContent.trim();
+            const selectedColor = activeColor.dataset.color.trim();
+
+            const match = variants.find(v => 
+                v.size_value.trim() === selectedSize && 
+                v.color_name.trim() === selectedColor
+            );
+
+            if(!match) {
+                showToast("⚠ Selected variant not found!");
+                return;
+            }
+
+            if(match.qty == 0) {
+                showToast("⚠ This item is out of stock!");
+                return;
+            }
+
+            const qty = document.getElementById("qtyValue").textContent;
+            window.location.href = "checkout.php?mode=buynow&inventory_id=" + match.inventory_id + "&qty=" + qty;
         }
 
         function refreshCart() {
